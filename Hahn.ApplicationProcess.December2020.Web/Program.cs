@@ -20,7 +20,18 @@ namespace Hahn.ApplicationProcess.December2020.Web
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                    .UseKestrel(options =>
+                    {
+                        // HTTP 5000
+                        options.ListenLocalhost(5000);
+
+                        // HTTPS 5001
+                        options.ListenLocalhost(5001, builder =>
+                        {
+                            builder.UseHttps();
+                        });
+                    });
                 });
     }
 }
