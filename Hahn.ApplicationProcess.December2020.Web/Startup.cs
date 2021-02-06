@@ -1,3 +1,5 @@
+using AutoMapper;
+using Hahn.ApplicationProcess.December2020.Domain;
 using Hahn.ApplicationProcess.December2020.Domain.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,10 +19,10 @@ namespace Hahn.ApplicationProcess.December2020.Web
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IApplicationProcessService, ApplicationProcessService>();
+            ConfigureDomainServices(services);
+                        
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -28,7 +30,17 @@ namespace Hahn.ApplicationProcess.December2020.Web
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        private void ConfigureDomainServices(IServiceCollection services) 
+        {
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new ApplicationProcessMappingProfile());
+            });
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+            services.AddScoped<IApplicationProcessService, ApplicationProcessService>();
+        }
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
