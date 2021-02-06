@@ -2,6 +2,7 @@
 using Hahn.ApplicationProcess.December2020.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace Hahn.ApplicationProcess.December2020.Web.Controllers
 {
@@ -18,8 +19,13 @@ namespace Hahn.ApplicationProcess.December2020.Web.Controllers
             _logger = logger;
             _applicationProcessService = applicationProcessService;
         }
-
         [HttpGet]
+        public IEnumerable<Applicant> Get()
+        {
+            return _applicationProcessService.GetAllApplicants();
+        }
+
+        [HttpGet("{id:int}")]
         public Applicant Get(int id)
         {
            return _applicationProcessService.GetApplicant(id);

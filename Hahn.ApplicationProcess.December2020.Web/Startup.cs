@@ -1,8 +1,11 @@
 using AutoMapper;
+using Hahn.ApplicationProcess.December2020.Data;
+using DAO = Hahn.ApplicationProcess.December2020.Data.DAO;
 using Hahn.ApplicationProcess.December2020.Domain;
 using Hahn.ApplicationProcess.December2020.Domain.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,6 +24,8 @@ namespace Hahn.ApplicationProcess.December2020.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
+            ConfigureDataServices(services);
+
             ConfigureDomainServices(services);
                         
             services.AddControllers();
@@ -40,6 +45,14 @@ namespace Hahn.ApplicationProcess.December2020.Web
             services.AddSingleton(mapper);
             services.AddScoped<IApplicationProcessService, ApplicationProcessService>();
         }
+        private void ConfigureDataServices(IServiceCollection services)
+        {
+            services.AddDbContext<ApplicationDBContext>(options => 
+                options.UseInMemoryDatabase("ApplicationProcess"));
+
+            services.AddScoped<IRepository<DAO.Applicant>, Repository<DAO.Applicant>>();
+        }
+        
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
