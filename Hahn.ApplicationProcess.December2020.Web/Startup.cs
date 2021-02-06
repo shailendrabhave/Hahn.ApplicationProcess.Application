@@ -2,6 +2,7 @@ using AutoMapper;
 using Hahn.ApplicationProcess.December2020.Data;
 using DAO = Hahn.ApplicationProcess.December2020.Data.DAO;
 using Hahn.ApplicationProcess.December2020.Domain;
+using DTO = Hahn.ApplicationProcess.December2020.Domain.DTO;
 using Hahn.ApplicationProcess.December2020.Domain.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,6 +11,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using FluentValidation;
+using Hahn.ApplicationProcess.December2020.Domain.Validators;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Diagnostics;
+using FluentValidation.AspNetCore;
 
 namespace Hahn.ApplicationProcess.December2020.Web
 {
@@ -27,8 +33,10 @@ namespace Hahn.ApplicationProcess.December2020.Web
             ConfigureDataServices(services);
 
             ConfigureDomainServices(services);
-                        
-            services.AddControllers();
+
+            services.AddControllers()
+                .AddFluentValidation(fluentValidator => fluentValidator.RegisterValidatorsFromAssemblyContaining<ApplicantValidator>());
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Hahn.ApplicationProcess.December2020.Web", Version = "v1" });
@@ -43,8 +51,10 @@ namespace Hahn.ApplicationProcess.December2020.Web
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
+            services.AddHttpClient();
             services.AddScoped<IApplicationProcessService, ApplicationProcessService>();
         }
+
         private void ConfigureDataServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDBContext>(options => 
@@ -53,7 +63,6 @@ namespace Hahn.ApplicationProcess.December2020.Web
             services.AddScoped<IRepository<DAO.Applicant>, Repository<DAO.Applicant>>();
         }
         
-
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

@@ -28,11 +28,12 @@ namespace Hahn.ApplicationProcess.December2020.Web.Controllers
         [HttpGet("{id:int}")]
         public Applicant Get(int id)
         {
-           return _applicationProcessService.GetApplicant(id);
+            var applicant = _applicationProcessService.GetApplicant(id);
+            return applicant;
         }
 
         [HttpPost]
-        public void Post(Applicant applicant)
+        public void ActionResult(Applicant applicant)
         {
             _applicationProcessService.AddNewApplicant(applicant);
         }

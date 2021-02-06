@@ -10,12 +10,14 @@ namespace Hahn.ApplicationProcess.December2020.Domain.Services
     {
         private readonly IMapper _mapper;
         private readonly IRepository<DAO.Applicant> _repository;
-        public ApplicationProcessService(IMapper mapper, IRepository<DAO.Applicant> repository)
+
+        public ApplicationProcessService(IMapper mapper,
+            IRepository<DAO.Applicant> repository)
         {
             _mapper = mapper;
             _repository = repository;
         }
-        
+
         public IEnumerable<DTO.Applicant> GetAllApplicants()
         {
             var applicants = _repository.GetAll();
