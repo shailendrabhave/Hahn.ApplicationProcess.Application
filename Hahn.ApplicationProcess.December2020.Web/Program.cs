@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,23 +16,43 @@ namespace Hahn.ApplicationProcess.December2020.Web
         {
             CreateHostBuilder(args).Build().Run();
         }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var builder = Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>()
-                    .UseKestrel(options =>
-                    {
-                        // HTTP 5000
-                        options.ListenLocalhost(5000);
-
-                        // HTTPS 5001
-                        options.ListenLocalhost(5001, builder =>
-                        {
-                            builder.UseHttps();
-                        });
-                    });
+                    webBuilder.UseStartup<Startup>();
                 });
+
+            ConfigureLogging(builder);
+            return builder;
+        }
+
+        private static void ConfigureLogging(IHostBuilder builder) 
+        {
+            var configSettings = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Error);
+            });
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(configSettings["Logging:LogPath"], rollOnFileSizeLimit: true, fileSizeLimitBytes: 100000)
+                .CreateLogger();
+
+            builder.ConfigureAppConfiguration(config =>
+            {
+                config.AddConfiguration(configSettings);
+            })
+            .ConfigureLogging(logging =>
+            {
+                logging.AddSerilog();
+            });
+        }
     }
 }
