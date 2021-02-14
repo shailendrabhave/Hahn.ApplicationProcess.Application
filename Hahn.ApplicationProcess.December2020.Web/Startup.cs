@@ -1,9 +1,10 @@
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Hahn.ApplicationProcess.December2020.Data;
-using DAO = Hahn.ApplicationProcess.December2020.Data.DAO;
 using Hahn.ApplicationProcess.December2020.Domain;
-using DTO = Hahn.ApplicationProcess.December2020.Domain.DTO;
 using Hahn.ApplicationProcess.December2020.Domain.Services;
+using Hahn.ApplicationProcess.December2020.Domain.Validators;
+using Hahn.ApplicationProcess.December2020.Web.Examples;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using FluentValidation;
-using Hahn.ApplicationProcess.December2020.Domain.Validators;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Diagnostics;
-using FluentValidation.AspNetCore;
+using Swashbuckle.AspNetCore.Filters;
+using System;
+using System.IO;
+using DAO = Hahn.ApplicationProcess.December2020.Data.DAO;
+using DTO = Hahn.ApplicationProcess.December2020.Domain.DTO;
 
 namespace Hahn.ApplicationProcess.December2020.Web
 {
@@ -34,13 +35,23 @@ namespace Hahn.ApplicationProcess.December2020.Web
 
             ConfigureDomainServices(services);
 
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp/build";
+            });
+
             services.AddControllers()
-                .AddFluentValidation(fluentValidator => fluentValidator.RegisterValidatorsFromAssemblyContaining<ApplicantValidator>());
+                .AddFluentValidation(fluentValidator => 
+                    fluentValidator.RegisterValidatorsFromAssemblyContaining<ApplicantValidator>());
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Hahn.ApplicationProcess.December2020.Web", Version = "v1" });
+                c.ExampleFilters();
             });
+
+            services.AddSwaggerExamplesFromAssemblyOf<ApplicantExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<ListApplicantExample>();
         }
 
         private void ConfigureDomainServices(IServiceCollection services) 
@@ -76,11 +87,23 @@ namespace Hahn.ApplicationProcess.December2020.Web
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseStaticFiles();
+
+            app.UseSpaStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+
+                if (env.IsDevelopment())
+                {
+                    //spa.UseReactDevelopmentServer(npmScript: "start");
+                }
             });
         }
     }

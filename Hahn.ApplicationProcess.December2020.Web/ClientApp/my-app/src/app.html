@@ -1,0 +1,47 @@
+<template>
+  <form submit.trigger="registerApplicant()">
+    <table>
+      <tr>
+        <td>Name: </td>
+        <td><input type="text" value.bind="applicant.name"></td>
+      </tr>
+      <tr>
+        <td>Family Name: </td>
+        <td><input type="text" value.bind="applicant.familyName"></td>
+      </tr>
+      <tr>
+        <td>Address: </td>
+        <td><input type="text" value.bind="applicant.address"></td>
+      </tr>
+      <tr>
+        <td>Country Of Origin: </td>
+        <td><input type="text" value.bind="applicant.countryOfOrigin"></td>
+      </tr>
+      <tr>
+        <td>Email Address: </td>
+        <td><input type="text" value.bind="applicant.emailAddress"></td>
+      </tr>
+      <tr>
+        <td>Age: </td>
+        <td><input type="number" value.bind="applicant.age"></td>
+      </tr>
+      <tr>
+        <td>Hired: </td>
+        <td>
+          <label>
+            <input type="radio" name="hired" model.bind="true" checked.bind="applicant.hired">
+            Yes
+          </label>
+          <label>
+            <input type="radio" name="hired" model.bind="false" checked.bind="applicant.hired">
+            No
+          </label>
+        </td>
+      </tr>
+    </table>
+    <button type="submit">Register</button>
+  </form>
+
+  <h2>${message}</h2>
+</template>
+
